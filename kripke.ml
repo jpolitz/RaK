@@ -36,6 +36,7 @@ module Kripke (State : STATE_TYPE) (Prop : PROP_TYPE) =
         | Iff of phi * phi
         | Implies of phi * phi
         | Knows of int * phi
+        | Everyone of int list * phi
 
       let rec satisfies ((states, pi, k) as kripke) state phi = match phi with
         | Prim prop -> (pi state prop)
@@ -52,13 +53,8 @@ module Kripke (State : STATE_TYPE) (Prop : PROP_TYPE) =
           let reachables = 
             StatePairs.filter (fun (s, t) -> s = state) (List.nth k i) in
           StatePairs.for_all (fun (s, t) -> satisfies kripke t p) reachables
+        | Everyone (is, p) ->
+          List.for_all (fun i -> satisfies kripke state (Knows (i, p))) is
 
   end;;
-
-module StringOrderedType = struct
-  type t = string
-  let compare = Pervasives.compare
-end;;
-  
-module StringKripke = Kripke (StringOrderedType) (StringOrderedType)
 
